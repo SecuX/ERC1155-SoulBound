@@ -59,5 +59,24 @@ describe("ERC1155SoulBound", async function () {
     it("can issue token", async function () {
       await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
     });
+
+    it("cannot issue multiple tokens", async function () {
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await expect(
+        this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid)
+      ).to.be.revertedWith("address has already issued");
+    });
+
+    it("cannot issue token without issuer", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.owner).issue(this.addr1.address, tokenid)
+      ).to.be.revertedWith("caller is not issuer");
+    });
+
+    it("can issue token (burnt before)", async function () {
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.addr1).burn(this.addr1.address, tokenid, 1);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+    });
   });
 });

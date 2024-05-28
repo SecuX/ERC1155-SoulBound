@@ -2,10 +2,10 @@
 // Creator: SecuX
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
+contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
     address private _issuer;
 
     constructor() {
@@ -36,5 +36,29 @@ contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
 
     function issue(address account, uint256 id) public {
         _mint(account, id, 1, '');
+    }
+
+    /**
+     * @dev Overrides _update to make token minted from issuer only.
+     *
+     * Requirements:
+     *
+     * - The caller must be issuer.
+     * - The quantity must be 1.
+     * - The `to` address must not have token.
+     */
+    function _update(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values
+    ) internal virtual override {
+        require(to == address(0) || msg.sender == _issuer, "caller is not issuer");
+        require(ids.length == 1, "quantity must be 1");
+        require(values.length == 1, "quantity must be 1");
+        require(values[0] == 1, "quantity must be 1");
+        require(balanceOf(to, ids[0]) == 0, "address has already issued");
+
+        super._update(from, to, ids, values);
     }
 }
