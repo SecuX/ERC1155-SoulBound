@@ -53,6 +53,12 @@ contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
         uint256[] memory ids,
         uint256[] memory values
     ) internal virtual override {
+        if (from != address(0)) {
+            if (to != address(0)) {
+                revert("SoulboundTokenCannotBeTransferred");
+            }
+        }
+        
         require(to == address(0) || msg.sender == _issuer, "caller is not issuer");
         require(ids.length == 1, "quantity must be 1");
         require(values.length == 1, "quantity must be 1");

@@ -79,4 +79,37 @@ describe("ERC1155SoulBound", async function () {
       await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
     });
   });
+
+  describe("Transfer", function () {
+    let tokenid = Math.ceil(Math.random() * 1e10);
+    beforeEach(async function () {
+      await this.erc1155SoulBound.connect(this.owner).initialize(metadataUri, this.issuer.address);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+    });
+
+    it("cannot transfer token", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.addr1).safeTransferFrom(this.addr1.address, this.addr2.address, tokenid, 1, '0x')
+      ).to.be.revertedWith("SoulboundTokenCannotBeTransferred");
+    });
+  });
+
+  describe("Burn", function () {
+    let tokenid = Math.ceil(Math.random() * 1e10);
+    beforeEach(async function () {
+      await this.erc1155SoulBound.connect(this.owner).initialize(metadataUri, this.issuer.address);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr2.address, tokenid);
+    });
+
+    it("can burn token", async function () {
+      await this.erc1155SoulBound.connect(this.addr2).burn(this.addr2.address, tokenid, 1);
+    });
+
+    it("cannot burn token without owner", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.addr2).burn(this.addr1.address, tokenid, 1)
+      ).to.be.reverted;
+    });
+  });
 });
