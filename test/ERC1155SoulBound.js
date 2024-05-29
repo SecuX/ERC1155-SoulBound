@@ -48,6 +48,12 @@ describe("ERC1155SoulBound", async function () {
         this.erc1155SoulBound.connect(this.issuer).setIssuer(this.issuer.address)
       ).to.be.reverted;
     });
+
+    it("cannot set owner as issuer", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.owner).setIssuer(this.owner.address)
+      ).to.be.revertedWith("owner cannot be issuer");
+    });
   });
 
   describe("Issue", function () {
@@ -60,11 +66,9 @@ describe("ERC1155SoulBound", async function () {
       await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
     });
 
-    it("cannot issue multiple tokens", async function () {
+    it("can issue multiple tokens", async function () {
       await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
-      await expect(
-        this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid)
-      ).to.be.revertedWith("address has already issued");
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
     });
 
     it("cannot issue token without issuer", async function () {
@@ -102,8 +106,12 @@ describe("ERC1155SoulBound", async function () {
       await this.erc1155SoulBound.connect(this.issuer).issue(this.addr2.address, tokenid);
     });
 
-    it("can burn token", async function () {
+    it("owner can burn token", async function () {
       await this.erc1155SoulBound.connect(this.addr2).burn(this.addr2.address, tokenid, 1);
+    });
+
+    it("issuer can burn token", async function () {
+      await this.erc1155SoulBound.connect(this.issuer).burn(this.addr2.address, tokenid, 1);
     });
 
     it("cannot burn token without owner", async function () {
@@ -124,15 +132,21 @@ describe("ERC1155SoulBound", async function () {
       expect(await this.erc1155SoulBound.uri(0)).to.equal(metadataUri);
     });
 
-    it("owner can set URI", async function () {
-      await this.erc1155SoulBound.connect(this.owner).setURI(newUri);
+    it("owner cannot set URI", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.owner).setURI(newUri)
+      ).to.be.revertedWith("invalid caller");
+    });
+
+    it("issuer can set URI", async function () {
+      await this.erc1155SoulBound.connect(this.issuer).setURI(newUri);
       expect(await this.erc1155SoulBound.uri(0)).to.equal(newUri);
     });
 
-    it("non-owner cannot set URI", async function () {
+    it("others cannot set URI", async function () {
       await expect(
         this.erc1155SoulBound.connect(this.addr1).setURI(newUri)
-      ).to.be.revertedWith("invalid caller");
+      ).to.be.reverted;
     });
   });
 });

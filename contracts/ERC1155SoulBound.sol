@@ -2,10 +2,10 @@
 // Creator: SecuX
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
+contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
     address private _issuer;
 
     constructor() {
@@ -27,17 +27,29 @@ contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
     }
 
     function setIssuer(address issuer) public onlyOwner {
+        require(issuer != owner(), "owner cannot be issuer");
+
         _issuer = issuer;
     }
 
     function setURI(string memory newuri) public {
-        require(msg.sender == owner(), "invalid caller");
+        require(msg.sender == _issuer, "invalid caller");
 
         _setURI(newuri);
     }
 
     function issue(address account, uint256 id) public {
         _mint(account, id, 1, '');
+    }
+
+    function burn(address account, uint256 id, uint256 value) public {
+        if (msg.sender != account && msg.sender != _issuer) {
+            if (!isApprovedForAll(account, msg.sender)) {
+                revert ERC1155MissingApprovalForAll(msg.sender, account);
+            }
+        }
+
+        _burn(account, id, value);
     }
 
     /**
@@ -61,11 +73,6 @@ contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
         else {
             require(msg.sender == _issuer, "caller is not issuer");
         }
-
-        require(ids.length == 1, "quantity must be 1");
-        require(values.length == 1, "quantity must be 1");
-        require(values[0] == 1, "quantity must be 1");
-        require(balanceOf(to, ids[0]) == 0, "address has already issued");
 
         super._update(from, to, ids, values);
     }
