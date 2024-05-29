@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "npx hardhat test"
+    "deploy": "npx hardhat ignition deploy ignition/modules/deploy.js --network amoy",
+    "test": "npx hardhat test",
+    "test:deploy": "npx hardhat ignition deploy ignition/modules/deploy.js"
   },
   "keywords": [],
   "author": "",
