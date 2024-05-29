@@ -30,7 +30,9 @@ contract ERC1155SoulBound is ERC1155BurnableUpgradeable, OwnableUpgradeable {
         _issuer = issuer;
     }
 
-    function setURI(string memory newuri) public onlyOwner {
+    function setURI(string memory newuri) public {
+        require(msg.sender == owner(), "invalid caller");
+
         _setURI(newuri);
     }
 

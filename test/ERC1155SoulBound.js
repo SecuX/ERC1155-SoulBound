@@ -3,7 +3,7 @@ const { expect } = require("chai");
 
 describe("ERC1155SoulBound", async function () {
   const contractName = "ERC1155SoulBound";
-  const metadataUri = "";
+  const metadataUri = "https://token-cdn-domain/{id}.json";
 
   beforeEach(async function () {
     const [owner, issuer, addr1, addr2] = await ethers.getSigners();
@@ -110,6 +110,29 @@ describe("ERC1155SoulBound", async function () {
       await expect(
         this.erc1155SoulBound.connect(this.addr2).burn(this.addr1.address, tokenid, 1)
       ).to.be.reverted;
+    });
+  });
+
+  describe("URI", function () {
+    const newUri = "https://token-cdn-domain-2/{id}.json";
+
+    beforeEach(async function () {
+      await this.erc1155SoulBound.connect(this.owner).initialize(metadataUri, this.issuer.address);
+    });
+
+    it("URI initialized", async function () {
+      expect(await this.erc1155SoulBound.uri(0)).to.equal(metadataUri);
+    });
+
+    it("owner can set URI", async function () {
+      await this.erc1155SoulBound.connect(this.owner).setURI(newUri);
+      expect(await this.erc1155SoulBound.uri(0)).to.equal(newUri);
+    });
+
+    it("non-owner cannot set URI", async function () {
+      await expect(
+        this.erc1155SoulBound.connect(this.addr1).setURI(newUri)
+      ).to.be.revertedWith("invalid caller");
     });
   });
 });
