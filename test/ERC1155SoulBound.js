@@ -90,7 +90,7 @@ describe("ERC1155SoulBound", async function () {
     it("cannot transfer token", async function () {
       await expect(
         this.erc1155SoulBound.connect(this.addr1).safeTransferFrom(this.addr1.address, this.addr2.address, tokenid, 1, '0x')
-      ).to.be.revertedWith("SoulboundTokenCannotBeTransferred");
+      ).to.be.revertedWith("non-transferable token");
     });
   });
 
