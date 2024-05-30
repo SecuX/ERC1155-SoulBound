@@ -5,7 +5,9 @@
   "scripts": {
     "deploy": "npx hardhat ignition deploy ignition/modules/deploy.js --network amoy",
     "issue": "npx hardhat ignition deploy ignition/modules/issue.js --network amoy",
+    "issueBatch": "npx hardhat ignition deploy ignition/modules/issueBatch.js --network amoy",
     "burn": "npx hardhat ignition deploy ignition/modules/burn.js --network amoy",
+    "burnBatch": "npx hardhat ignition deploy ignition/modules/burnBatch.js --network amoy",
     "set:issuer": "npx hardhat ignition deploy ignition/modules/setIssuer.js --network amoy",
     "test": "npx hardhat test",
     "test:deploy": "npx hardhat ignition deploy ignition/modules/deploy.js"
