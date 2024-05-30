@@ -63,24 +63,28 @@ describe("ERC1155SoulBound", async function () {
     });
 
     it("can issue token", async function () {
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
     });
 
     it("can issue multiple tokens", async function () {
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
+      await this.erc1155SoulBound.connect(this.issuer).issueBatch(this.addr1.address, [tokenid], [1]);
     });
 
     it("cannot issue token without issuer", async function () {
       await expect(
-        this.erc1155SoulBound.connect(this.owner).issue(this.addr1.address, tokenid)
+        this.erc1155SoulBound.connect(this.owner).issue(this.addr1.address, tokenid, 1)
+      ).to.be.revertedWith("caller is not issuer");
+
+      await expect(
+        this.erc1155SoulBound.connect(this.owner).issueBatch(this.addr1.address, [tokenid], [1])
       ).to.be.revertedWith("caller is not issuer");
     });
 
     it("can issue token (burnt before)", async function () {
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
       await this.erc1155SoulBound.connect(this.addr1).burn(this.addr1.address, tokenid, 1);
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
     });
   });
 
@@ -88,7 +92,7 @@ describe("ERC1155SoulBound", async function () {
     let tokenid = Math.ceil(Math.random() * 1e10);
     beforeEach(async function () {
       await this.erc1155SoulBound.connect(this.owner).initialize(metadataUri, this.issuer.address);
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
     });
 
     it("cannot transfer token", async function () {
@@ -102,12 +106,16 @@ describe("ERC1155SoulBound", async function () {
     let tokenid = Math.ceil(Math.random() * 1e10);
     beforeEach(async function () {
       await this.erc1155SoulBound.connect(this.owner).initialize(metadataUri, this.issuer.address);
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid);
-      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr2.address, tokenid);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr1.address, tokenid, 1);
+      await this.erc1155SoulBound.connect(this.issuer).issue(this.addr2.address, tokenid, 1);
     });
 
     it("owner can burn token", async function () {
       await this.erc1155SoulBound.connect(this.addr2).burn(this.addr2.address, tokenid, 1);
+    });
+
+    it("owner can burn token (batch)", async function () {
+      await this.erc1155SoulBound.connect(this.addr2).burnBatch(this.addr2.address, [tokenid], [1]);
     });
 
     it("issuer can burn token", async function () {
@@ -117,6 +125,10 @@ describe("ERC1155SoulBound", async function () {
     it("cannot burn token without owner", async function () {
       await expect(
         this.erc1155SoulBound.connect(this.addr2).burn(this.addr1.address, tokenid, 1)
+      ).to.be.reverted;
+
+      await expect(
+        this.erc1155SoulBound.connect(this.addr2).burnBatch(this.addr1.address, [tokenid], [1])
       ).to.be.reverted;
     });
   });

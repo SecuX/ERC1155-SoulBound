@@ -38,8 +38,12 @@ contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
         _setURI(newuri);
     }
 
-    function issue(address account, uint256 id) public {
-        _mint(account, id, 1, '');
+    function issue(address account, uint256 id, uint256 value) public {
+        _mint(account, id, value, '');
+    }
+
+    function issueBatch(address account, uint256[] memory ids, uint256[] memory values) public {
+        _mintBatch(account, ids, values, '');
     }
 
     function burn(address account, uint256 id, uint256 value) public {
@@ -50,6 +54,16 @@ contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
         }
 
         _burn(account, id, value);
+    }
+
+    function burnBatch(address account, uint256[] memory ids, uint256[] memory values) public {
+        if (msg.sender != account && msg.sender != _issuer) {
+            if (!isApprovedForAll(account, msg.sender)) {
+                revert ERC1155MissingApprovalForAll(msg.sender, account);
+            }
+        }
+
+        _burnBatch(account, ids, values);
     }
 
     /**
