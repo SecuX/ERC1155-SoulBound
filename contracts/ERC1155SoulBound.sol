@@ -2,10 +2,10 @@
 // Creator: SecuX
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
+contract ERC1155SoulBound is ERC1155URIStorageUpgradeable, OwnableUpgradeable {
     address private _issuer;
 
     constructor() {
@@ -22,6 +22,7 @@ contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
         }
 
         __ERC1155_init(uri);
+        __ERC1155URIStorage_init();
         __Ownable_init(msg.sender);
         _issuer = issuer;
     }
@@ -36,6 +37,12 @@ contract ERC1155SoulBound is ERC1155Upgradeable, OwnableUpgradeable {
         require(msg.sender == _issuer, "invalid caller");
 
         _setURI(newuri);
+    }
+
+    function setTokenURI(uint256 tokenId, string memory tokenURI) public {
+        require(msg.sender == _issuer, "invalid caller");
+
+        _setURI(tokenId, tokenURI);
     }
 
     function issue(address account, uint256 id, uint256 value) public {

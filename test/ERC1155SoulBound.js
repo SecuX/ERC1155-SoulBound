@@ -160,5 +160,12 @@ describe("ERC1155SoulBound", async function () {
         this.erc1155SoulBound.connect(this.addr1).setURI(newUri)
       ).to.be.reverted;
     });
+
+    it("issuer can set tokenURI", async function () {
+      const tokenURI = Math.ceil(Math.random() * 1e18).toString();
+      await this.erc1155SoulBound.connect(this.issuer).setTokenURI(1, tokenURI);
+      expect(await this.erc1155SoulBound.uri(0)).to.equal(metadataUri);
+      expect(await this.erc1155SoulBound.uri(1)).to.equal(tokenURI);
+    });
   });
 });
