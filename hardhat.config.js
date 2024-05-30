@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-gas-reporter");
 dotenv.config();
 
 const accounts = [
@@ -27,5 +28,9 @@ module.exports = {
             url: "https://rpc.ankr.com/polygon_amoy",
             accounts
         },
+    },
+    gasReporter: {
+        enabled: true,
+        reportFormat: "markdown",
     }
 };
